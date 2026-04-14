@@ -52,7 +52,7 @@ export function setupAuth(app) {
     authError.textContent = "";
     const email = inputEmail.value.trim();
     const password = inputPassword.value;
-
+    btnSubmit.disabled = true;
     try {
       if (mode === "signup") {
         await createUserWithEmailAndPassword(auth, email, password);
@@ -61,18 +61,23 @@ export function setupAuth(app) {
       }
     } catch (err) {
       authError.textContent = friendlyError(err.code);
+    } finally {
+      btnSubmit.disabled = false;
     }
   });
 
   // Google sign-in
   btnGoogle.addEventListener("click", async () => {
     authError.textContent = "";
+    btnGoogle.disabled = true;
     try {
       await signInWithPopup(auth, provider);
     } catch (err) {
       if (err.code !== "auth/popup-closed-by-user") {
         authError.textContent = friendlyError(err.code);
       }
+    } finally {
+      btnGoogle.disabled = false;
     }
   });
 
