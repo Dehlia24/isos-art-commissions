@@ -5,31 +5,27 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  doc, getDoc, setDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-export function setupAuth(app) {
+export function setupAuth(app, db) {
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // DOM elements
-  const authPanel    = document.getElementById("auth-panel");
-  const welcomePanel = document.getElementById("welcome-panel");
-  const welcomeMsg   = document.getElementById("welcome-msg");
-  const authForm     = document.getElementById("auth-form");
-  const inputEmail   = document.getElementById("input-email");
+  const authPanel     = document.getElementById("auth-panel");
+  const authForm      = document.getElementById("auth-form");
+  const inputEmail    = document.getElementById("input-email");
   const inputPassword = document.getElementById("input-password");
-  const btnSubmit    = document.getElementById("btn-submit");
-  const btnGoogle    = document.getElementById("btn-google");
-  const btnSignout   = document.getElementById("btn-signout");
+  const btnSubmit     = document.getElementById("btn-submit");
+  const btnGoogle     = document.getElementById("btn-google");
   const btnShowSignin = document.getElementById("btn-show-signin");
   const btnShowSignup = document.getElementById("btn-show-signup");
-  const authError    = document.getElementById("auth-error");
+  const authError     = document.getElementById("auth-error");
 
-  // Track current mode: "signin" or "signup"
   let mode = "signin";
 
-  // Toggle between sign-in and sign-up
   btnShowSignin.addEventListener("click", () => {
     mode = "signin";
     btnSubmit.textContent = "Sign In";
@@ -46,7 +42,6 @@ export function setupAuth(app) {
     authError.textContent = "";
   });
 
-  // Email/password form submit
   authForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     authError.textContent = "";
@@ -66,7 +61,6 @@ export function setupAuth(app) {
     }
   });
 
-  // Google sign-in
   btnGoogle.addEventListener("click", async () => {
     authError.textContent = "";
     btnGoogle.disabled = true;
@@ -81,26 +75,25 @@ export function setupAuth(app) {
     }
   });
 
-  // Sign out
-  btnSignout.addEventListener("click", () => signOut(auth));
-
-  // Auth state listener — switches between panels
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      authPanel.hidden = true;
-      welcomePanel.hidden = false;
-      const name = user.displayName || user.email || "friend";
-      welcomeMsg.textContent = `Welcome, ${name}!`;
-    } else {
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
       authPanel.hidden = false;
-      welcomePanel.hidden = true;
       authForm.reset();
       authError.textContent = "";
+      return;
     }
+
+    authPanel.hidden = true;
+
+    // Write user record so admins can look up UID by email
+    await setDoc(doc(db, "users", user.uid), { email: user.email }, { merge: true });
+
+    // Route based on admin status
+    const adminSnap = await getDoc(doc(db, "admins", user.uid));
+    window.location.href = adminSnap.exists() ? "admin.html" : "client.html";
   });
 }
 
-// Converts Firebase error codes to readable messages
 function friendlyError(code) {
   const messages = {
     "auth/invalid-email":          "That doesn't look like a valid email address.",
