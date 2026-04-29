@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iso's Art Commissions</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="dashboard">
+
+  <header>
+    <span class="site-title">Iso's Art Commissions</span>
+    <div class="header-right">
+      <span id="client-email"></span>
+      <button id="btn-signout">Sign Out</button>
+    </div>
+  </header>
+
+  <div style="padding:20px 24px;max-width:760px;">
+    <div class="client-toolbar">
+      <h2>My Commissions</h2>
+      <button id="btn-request" class="btn-primary">+ Request Commission</button>
+    </div>
+
+    <!-- Request Commission Form -->
+    <div id="request-form" hidden>
+      <h3>New Commission Request</h3>
+      <input type="text" id="rf-title"
+             placeholder="What would you like? (required)" />
+      <textarea id="rf-description"
+                placeholder="Tell Iso more — character description, style, references, etc."></textarea>
+      <div class="form-actions">
+        <button id="btn-rf-cancel" class="btn-secondary">Cancel</button>
+        <button id="btn-rf-submit" class="btn-primary">Submit Request</button>
+      </div>
+      <p id="rf-error" class="error-msg"></p>
+    </div>
+
+    <div id="commission-list"></div>
+  </div>
+
+  <script type="module" src="js/client.js"></script>
+</body>
+</html>
